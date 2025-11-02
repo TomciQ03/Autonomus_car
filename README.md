@@ -58,7 +58,7 @@ Both algorithms work **without machine learning** — the system relies solely o
 - **Python 3.13.7**
 - **OpenCV**
 - **NumPy**
-- **Matplotlib**
+- **Math**
 - **Jupyter Notebook** (for prototyping and testing)
 
 > No machine learning or deep learning techniques are used in this project.
