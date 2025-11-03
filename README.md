@@ -106,10 +106,10 @@ Both algorithms work **without machine learning** — the system relies solely o
 ## 🧩 How to Run
 
 1. Clone this repository:
-   ```
+  ```
     git clone https://github.com/TomaszMarekQ03/Autonomous_car.git
     cd Autonomous_car
-   ```
+  ```
 
 2. Create and activate a virtual environment:
   ```
