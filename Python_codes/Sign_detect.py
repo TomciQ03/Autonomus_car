@@ -129,8 +129,19 @@ def color_checking_area(hsv_frame, contour, x, y, w, h):
 # =========================================
 
 def trafficsign_classifier(shape_name, dominant_color, roi):
-    """Sprawdza kształt i kolor, wybiera odpowiednią bazę i zwraca dopasowanie ORB."""
-    
+    """
+    Choose the correct sign group based on shape and color
+    then run ORB matching inside that group
+
+    Args:
+        shape_name (str): geometric class ("Trojkat", "Kolo", "Osmiokat")
+        dominant_color (str): color label from HSV ("Czerwony", "Pomaranczowy", "Niebieski", ...)
+        roi (np.ndarray): BGR region of interest (cropped sign candidate)
+
+    Returns:
+        name (str|None): best matched sign name from the database, or "Niezidentyfikowany"
+        score (float): matching score (0–100), higher is better
+    """
     # Dobór folderu na podstawie kształtu i koloru
     if shape_name == "Osmiokat" and dominant_color == "Czerwony":
         group_folder = os.path.join(BASE_PATH, "STOP")
@@ -159,6 +170,25 @@ def trafficsign_classifier(shape_name, dominant_color, roi):
 # =========================================
 
 def detect_shapes(frame):
+    """
+    Detect traffic-sign candidate shapes on a BGR frame
+
+    Steps:
+        - apply CLAHE + blur + Canny edges
+        - find external contours
+        - filter by area and perimeter
+        - classify shape (triangle, circle, octagon)
+        - estimate dominant color inside contour (HSV)
+        - call trafficsign_classifier for ORB-based matching
+
+    Args:
+        frame (np.ndarray): BGR frame from camera
+
+    Returns:
+        output (np.ndarray): BGR frame with drawn contours and labels
+        edges (np.ndarray): edge image (debug view)
+        blur (np.ndarray): preprocessed grayscale/blurred image (debug view)
+    """
     clahe = cv2.createCLAHE(clipLimit=3, tileGridSize=(8, 8))
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     equalized = clahe.apply(gray)

@@ -160,17 +160,22 @@ Autonomous_car/
 | ![Lane](images/Lane_detect_demo.png) | ![Sign](images/Sign_detect_demo.png) |
 
 ---
+## 📊 Project Status
 
-## 🛣️ Project Roadmap (WIP)
+> **Current Stage:** Feature development  
+> **Next Milestone:** Lane detection code expansion - crossroads detecting  
+
+
+### 🛣️ Project Roadmap (WIP)
 
 - [x] 3D printed Car design
-- [x] Electrical components seletion
+- [x] Electrical components selection
 - [x] Lane detection using static image
 - [x] Traffic sign detection using camera
 - [ ] Crossroads detection in Lane detection code
 - [ ] Integrate both systems into one module
 - [ ] Implement Raspberry Pi support (camera + motor control)
-- [ ] Add basic PID steering logic and sign que
+- [ ] Add basic PID steering logic and sign queue
 - [ ] Prepare final demo with autonomous movement
 
 

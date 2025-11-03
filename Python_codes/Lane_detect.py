@@ -17,10 +17,19 @@ def nothing(a):
 
 def getHistogram(img, minPer=0.1, display=None, region=1):
     """
-    Wyznacza środek pasa z histogramu kolumnowego.
-    - region == 1: prognoza (uśrednianie / centroid z całego obrazu) -- stablilniejsze przewidywanie
-    - region != 1: aktualny środek (argmax w dolnym regionie) -- dokładniejszy dla bieżącej pozycji
-    display: jeśli None -> użyje globalnej zmiennej DISPLAY, jeśli True -> zwróci również obraz histogramu
+    Compute lane center position from a column-wise histogram
+
+    Args:
+        img (np.ndarray): binary or grayscale warped image
+        minPer (float): threshold (fraction of max) used to ignore weak columns
+        display (bool|None): if True, returns a debug histogram image
+                             if None, uses global DISPLAY flag
+        region (int): if 1 -> use full height (prediction)
+                      if >1 -> use bottom part of the image (current position)
+
+    Returns:
+        basePoint (int): estimated lane center x-coordinate
+        imgHist (np.ndarray|None): optional debug image with drawn histogram
     """
     # Jeśli nie przekazano jawnie display, użyj globalnej wartości DISPLAY
     if display is None:
@@ -98,7 +107,7 @@ def getHistogram(img, minPer=0.1, display=None, region=1):
 
 # ====================== TRACKBARY ======================
 def initializeTrackbars(initialTracbarVals, wT=480, hT=240):
-    """Inicjalizuje okno i suwaki do ustawiania trapezu do transformacji perspektywy."""
+    """Inicjalizuje okno i suwaki do ustawiania trapezu do transformacji perspektywy"""
     cv2.namedWindow("Points_Setup")
     cv2.resizeWindow("Points_Setup", 600, 300)
     cv2.createTrackbar("Width Top", "Points_Setup", initialTracbarVals[0], wT//2, nothing)
@@ -124,7 +133,7 @@ def getTrackbarValues(wT=480, hT=240):
     return points
 
 def drawPoints(img, points):
-    """Rysuje punkty i trapez poprawnie, bez krzyżowania linii."""
+    """Rysuje punkty i trapez poprawnie, bez krzyżowania linii"""
     reorder = np.array([0, 1, 3, 2])  # TL, TR, BR, BL zamiast TL, TR, BL, BR
     pts = np.int32(points[reorder])
     for x, y in pts:
@@ -134,7 +143,7 @@ def drawPoints(img, points):
 
 # ====================== TRANSFORMACJA ======================
 def warpIMG(img, points, w, h):
-    """Zwraca obraz po perspektywicznym przekształceniu."""
+    """Zwraca obraz po perspektywicznym przekształceniu"""
     pts1 = np.float32(points)
     pts2 = np.float32([[0, 0], [w, 0], [0, h], [w, h]])
     matrix = cv2.getPerspectiveTransform(pts1, pts2)
@@ -145,7 +154,16 @@ def warpIMG(img, points, w, h):
 
 
 def thresholding(img):
-    """Zwraca maskę dla wybranego zakresu HSV."""
+    """
+    Apply HSV-based thresholding to extract bright lane markings
+
+    Args:
+        img (np.ndarray): input BGR frame or road image
+
+    Returns:
+        maskWhite (np.ndarray): binary mask of lane candidates
+        (optionally thinned if ximgproc.thinning is available)
+    """
     imgHsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
     lowerWhite = np.array([h_min, s_min, v_min])
     upperWhite = np.array([h_max, s_max, v_max])
@@ -160,7 +178,21 @@ def thresholding(img):
 
 # ====================== GŁÓWNA FUNKCJA ======================
 def getLaneCurve(img):
-    """Zwraca maskę progowania i wynik transformacji perspektywicznej."""
+    """
+    Estimate lane center offset on a static road image
+
+    Processing steps:
+        - read trapezoid ROI from trackbars
+        - threshold image in HSV space
+        - apply perspective warp
+        - compute histogram-based lane center and average curve
+
+    Args:
+        img (np.ndarray): BGR image of the road
+
+    Returns:
+        None  # draws multiple debug windows and prints the curve value to console
+    """
     h, w, c = img.shape
     points = getTrackbarValues(w, h)
     imgThresh = thresholding(img)
