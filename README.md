@@ -1,4 +1,5 @@
 # 🚗 Autonomous Car Platform — Lane and Traffic Sign Detection (Work in Progress)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 **Status:** Development in progress  
 **Language:** Python 3.13.7  
@@ -102,6 +103,38 @@ Both algorithms work **without machine learning** — the system relies solely o
 
 ---
 
+## 🧩 How to Run
+
+1. Clone this repository:
+   ```
+   git clone https://github.com/TomaszMarekQ03/Autonomous_car.git
+   cd Autonomous_car
+   ```
+
+2. Create and activate a virtual environment:
+  ```
+    python -m venv .venv
+    .\.venv\Scripts\activate
+  ```
+
+3. Install dependencies:
+  ```
+    pip install -r requirements.txt
+  ```
+
+4. Run each module separately:
+  ```
+    # For lane detection (static image)
+    python Python_codes/Line_detect.py
+
+    # For traffic sign detection (camera)
+    python Python_codes/Sign_detect.py
+  ```
+
+⚠️ Make sure your webcam is connected for sign detection.
+
+---
+
 ## 🗂️ Repository Structure
 ```
 Autonomous_car/
@@ -118,3 +151,26 @@ Autonomous_car/
 ├── README.md
 ├── requirements.txt
 ```
+---
+
+## 🖼️ Example Output
+
+| Lane Detection | Traffic Sign Detection |
+|----------------|------------------------|
+| ![Lane](images/Lane_detect_demo.png) | ![Sign](images/Sign_detect_demo.png) |
+
+---
+
+## 🛣️ Project Roadmap (WIP)
+
+- [x] 3D printed Car design
+- [x] Electrical components seletion
+- [x] Lane detection using static image
+- [x] Traffic sign detection using camera
+- [ ] Crossroads detection in Lane detection code
+- [ ] Integrate both systems into one module
+- [ ] Implement Raspberry Pi support (camera + motor control)
+- [ ] Add basic PID steering logic and sign que
+- [ ] Prepare final demo with autonomous movement
+
+

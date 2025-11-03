@@ -152,7 +152,8 @@ def thresholding(img):
     maskWhite = cv2.inRange(imgHsv, lowerWhite, upperWhite)
     maskWhite = cv2.morphologyEx(maskWhite, cv2.MORPH_CLOSE, np.ones((5,5), np.uint8))
     maskWhite = cv2.GaussianBlur(maskWhite, (5,5), 0)
-    maskWhite = cv2.ximgproc.thinning(maskWhite)
+    if hasattr(cv2, "ximgproc") and hasattr(cv2.ximgproc, "thinning"):
+        maskWhite = cv2.ximgproc.thinning(maskWhite)
 
     return maskWhite
 
