@@ -103,6 +103,7 @@ Both algorithms work **without machine learning** — the system relies solely o
 ---
 
 ## 🗂️ Repository Structure
+```
 Autonomous_car/
 ├── Python_codes/
 │ ├── Line_detect.py
@@ -116,3 +117,4 @@ Autonomous_car/
 │ ├── OGRANICZENIA/
 ├── README.md
 ├── requirements.txt
+```
