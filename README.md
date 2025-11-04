@@ -33,7 +33,7 @@ Both algorithms work **without machine learning** — the system relies solely o
 ## ⚙️ Features (Current State)
 
 ### 🧩 Lane Detection (`Line_detect.py`)
-- Works on static road images (e.g., `Linia_drogi/droga2.png`)
+- Works on static road images (e.g., `road_images/road2.png`)
 - Uses **HSV thresholding** and morphological operations to isolate lane markings
 - Applies **perspective transform** to simulate a top-down view
 - Computes lane center using **histogram-based analysis**
@@ -45,7 +45,7 @@ Both algorithms work **without machine learning** — the system relies solely o
   1. **Edge and contour extraction**
   2. **Shape classification** (triangle, circle, octagon)
   3. **Dominant color detection** (HSV-based)
-  4. **ORB descriptor matching** against an image database (`baza_do_porownania`)
+  4. **ORB descriptor matching** against an image database (`sign_database`)
 - Classifies signs such as:
   - Stop  
   - Warning (triangular, orange)  
@@ -55,7 +55,7 @@ Both algorithms work **without machine learning** — the system relies solely o
 ## 📥 Inputs / 📤 Outputs
 
 **Lane detection (`Line_detect.py`):**
-- **Input:** static road image (currently `Linia_drogi/droga2.png`).
+- **Input:** static road image (currently `road_images/road2.png`).
 - **Processing:** HSV thresholding → perspective warp → column histogram.
 - **Output (for now):**
   - Debug windows (`Warped`, `Warped Points`, histograms),
@@ -67,7 +67,7 @@ Both algorithms work **without machine learning** — the system relies solely o
   - Edge and contour detection,
   - Shape classification (triangle / circle / octagon),
   - Dominant color (HSV),
-  - ORB matching against image database in `baza_do_porownania/`.
+  - ORB matching against image database in `sign_database/`.
 - **Output:**
   - Live window with detected sign contour and text label (e.g. `STOP (92%)`),
   - Optional debug windows (edges, ROI, ORB matching preview).
@@ -90,7 +90,7 @@ Both algorithms work **without machine learning** — the system relies solely o
 
 - Lane detection currently works on a **single static image** only (no video yet).
 - Sign detection is tuned for a specific lighting setup and camera; thresholds may require manual tuning.
-- The traffic sign database in `baza_do_porownania/` is limited and does not cover all possible signs.
+- The traffic sign database in `sign_database/` is limited and does not cover all possible signs.
 - Control logic (steering/throttle) and Raspberry Pi integration are **not implemented yet**.
 - No automated tests yet — most validation is done visually via debug windows.
 
@@ -99,7 +99,7 @@ Both algorithms work **without machine learning** — the system relies solely o
 
 - 2025-11-03: Documented lane and sign detection modules, added WIP limitations.
 - 2025-11-02: Improved traffic sign classifier (shape + color → ORB group selection).
-- 2025-11-01: Initial version of lane detection on static image (`droga2.png`).
+- 2025-11-01: Initial version of lane detection on static image (`road2.png`).
 
 ---
 
@@ -107,7 +107,7 @@ Both algorithms work **without machine learning** — the system relies solely o
 
 1. Clone this repository:
   ```
-    git clone https://github.com/TomaszMarekQ03/Autonomous_car.git
+    git clone https://github.com/Tomasz-Marek/Autonomous_car.git
     cd Autonomous_car
   ```
 
@@ -141,13 +141,13 @@ Autonomous_car/
 ├── Python_codes/
 │ ├── Line_detect.py
 │ ├── Sign_detect.py
-├── Linia_drogi/
-│ ├── droga2.png
-├── baza_do_porownania/
-│ ├── STOP/
-│ ├── NAKAZ/
-│ ├── OSTRZEGAWCZE/
-│ ├── OGRANICZENIA/
+├── road_images/
+│ ├── road2.png
+├── sign_database/
+│ ├── stop_signs/
+│ ├── mandatory_signs/
+│ ├── warning_signs/
+│ ├── speed_limits_signs/
 ├── README.md
 ├── requirements.txt
 ```

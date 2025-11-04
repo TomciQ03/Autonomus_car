@@ -7,7 +7,7 @@ import os
 # --- CONFIGURATION (Engineering thesis code)
 # =========================================
 
-BASE_PATH = 'baza_do_porownania'
+BASE_PATH = 'sign_database'  # Base path for sign templates
 N_FEATURES = 3000
 MATCH_RATIO = 0.8
 MIN_SCORE = 30.0
@@ -198,15 +198,15 @@ def trafficsign_classifier(shape_name, dominant_color, roi):
     """
     # Select folder based on shape and color
     if shape_name == "Octagon" and dominant_color == "Red":
-        group_folder = os.path.join(BASE_PATH, "STOP")
+        group_folder = os.path.join(BASE_PATH, "stop_signs")
     elif shape_name == "Triangle" and dominant_color == "Orange":
-        group_folder = os.path.join(BASE_PATH, "OSTRZEGAWCZE")
+        group_folder = os.path.join(BASE_PATH, "warning_signs")
     elif shape_name == "Circle" and dominant_color != "Blue":
-        group_folder = os.path.join(BASE_PATH, "OGRANICZENIA")
+        group_folder = os.path.join(BASE_PATH, "speed_limits_signs")
     elif shape_name == "Circle" and dominant_color == "Blue":
         if DEBUG:
             print(f"[DEBUG] Shape: {shape_name}, Dominant color: {dominant_color}")
-        group_folder = os.path.join(BASE_PATH, "NAKAZ")
+        group_folder = os.path.join(BASE_PATH, "mandatory_signs")
     else:
         if DEBUG:
             print("[INFO] Unidentified sign candidate (shape/color combination).")
