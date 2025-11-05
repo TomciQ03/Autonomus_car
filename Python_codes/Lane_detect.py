@@ -417,7 +417,7 @@ def getLaneCurve(img):
 
 
 # ====================== ENTRY POINT ======================
-img = cv2.imread('road_images/road2.png')
+img = cv2.imread('road_images/crossroad.png')
 img = cv2.resize(img, (480, 240))
 
 if DEBUG:

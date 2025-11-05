@@ -1,6 +1,14 @@
 # 🚗 Autonomous Car Platform — Lane and Traffic Sign Detection (Work in Progress)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+---
 
+## 🖼️ Example Output
+
+| Lane Detection | Traffic Sign Detection |
+|----------------|------------------------|
+| ![Lane](images/Lane_detect_demo.png) | ![Sign](images/Sign_detect_demo.png) |
+
+---
 **Status:** Development in progress  
 **Language:** Python 3.13.7  
 **Operating System:** Windows 11  
@@ -153,13 +161,6 @@ Autonomous_car/
 ```
 ---
 
-## 🖼️ Example Output
-
-| Lane Detection | Traffic Sign Detection |
-|----------------|------------------------|
-| ![Lane](images/Lane_detect_demo.png) | ![Sign](images/Sign_detect_demo.png) |
-
----
 ## 📊 Project Status
 
 > **Current Stage:** Feature development  
