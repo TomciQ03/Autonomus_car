@@ -108,6 +108,59 @@ class SignDetector:
             "img_list": img_list,
         }
         return des_list, class_names, img_list
+    
+    def orb_match(self, roi, des_list, class_names, img_list):
+        """
+        Compare a region of interest (ROI) with a database of sign templates using ORB.
+
+        Args:
+            roi (np.ndarray): BGR region of interest (candidate sign).
+            orb (cv2.ORB): ORB detector instance.
+            bf (cv2.BFMatcher): Brute-force matcher.
+            des_list (list[np.ndarray]): Descriptors from database templates.
+            class_names (list[str]): Names for each template.
+            img_list (list[np.ndarray]): Grayscale template images.
+
+        Returns:
+            best_name (str | None): Name of best-matched template, or None.
+            best_score (float): Matching score (0–100), higher is better.
+            gray_roi (np.ndarray): Grayscale ROI used for matching.
+        """
+        if len(des_list) == 0:
+            return None, 0, None
+
+        gray_roi = cv2.cvtColor(roi, cv2.COLOR_BGR2GRAY)
+        kp2, des2 = self.orb.detectAndCompute(gray_roi, None)
+        if des2 is None:
+            return None, 0, None
+
+        best_score = 0
+        best_name = None
+        best_vis = None
+
+        for i, des in enumerate(des_list):
+            matches = self.bf.match(des, des2)
+            if not matches:
+                continue
+            matches = sorted(matches, key=lambda x: x.distance)
+            good_matches = [m for m in matches if m.distance < self.MATCH_RATIO * 100]
+
+            avg_distance = np.mean([m.distance for m in good_matches]) if good_matches else 100
+            score = max(0, 100 - avg_distance)
+
+            if score > best_score:
+                best_score = score
+                best_name = class_names[i]
+                best_vis = cv2.drawMatches(
+                    img_list[i], self.orb.detectAndCompute(img_list[i], None)[0],
+                    gray_roi, kp2, matches[:20], None,
+                    flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS
+                )
+
+        if self.DEBUG and best_vis is not None:
+            cv2.imshow("ORB Matching", best_vis)
+
+        return best_name, best_score, gray_roi
 
 
     # =========================================
