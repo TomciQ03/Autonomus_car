@@ -19,11 +19,11 @@ def main():
     print("[INFO] Uruchomiono kamerę. Naciśnij 'q' aby zakończyć.")
 
     while True:
-        #ret, frame = cap.read()
-        #if not ret:
-        #    print("[WARN] Nie udało się pobrać klatki.")
-        #    break
-        frame = cv2.imread("images/test2.jpg")
+        ret, frame = cap.read()
+        if not ret:
+            print("[WARN] Nie udało się pobrać klatki.")
+            break
+        #frame = cv2.imread("images/test2.jpg")
 
         # Opcjonalnie zmniejsz rozdzielczość (dla wydajności)
         frame = cv2.resize(frame, (640, 480))
