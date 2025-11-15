@@ -7,16 +7,27 @@ from Lane_detect import LaneDetector
 from Drive_control import DriveControl
 from Motors import MotorConfig
 
+# ================== CONFIG ==================
+
+# Set this to True if you want to use fisheye calibration (undistortion)
+# Set to False if you want to use raw camera frames (no undistortion)
+USE_CALIBRATION = True
+
+CALIB_FILE = "camera_fisheye_calib.npz"
+
+# Default resolution used when calibration is disabled or loading fails
+DEFAULT_DIM = (640, 480)
+IS_BGR = True
 
 # ----------------- Calibration loading ----------------- #
 
-def load_fisheye_calibration(path="camera_fisheye_calib.npz"):
+def load_fisheye_calibration(path=CALIB_FILE):
     """
     Load fisheye calibration from .npz file.
 
     Returns:
         K   : 3x3 camera matrix
-        D   : 4x1 fisheye distortion coefficients
+        D   : distortion coefficients (fisheye model, shape 4x1 or 1x4)
         DIM : (width, height)
     """
     data = np.load(path)
@@ -63,7 +74,7 @@ def create_undistort_maps(K, D, dim, balance=0.0):
 
     Args:
         K      : 3x3 camera matrix
-        D      : 4x1 distortion coefficients
+        D      : fisheye distortion coefficients
         dim    : (width, height)
         balance: 0.0..1.0, trade-off between FOV and cropping
 
@@ -100,7 +111,7 @@ def init_modules(frame_width, frame_height):
         frame_height=frame_height,
         debug=True,
         display=True,
-        ipm_trapezoid_init=(140, 240, 116, 240),  # adjust if needed
+        ipm_trapezoid_init=(140, 240, 116, 240),
     )
 
     motor_config = MotorConfig(
@@ -119,30 +130,40 @@ def init_modules(frame_width, frame_height):
 
 # ----------------- Main processing loop ----------------- #
 
-def run_main_loop(picam2, map1, map2, lane_detector, drive_controller, show_debug=True):
+def run_main_loop(picam2, lane_detector, drive_controller,
+                  map1=None, map2=None, show_debug=True):
     """
-    Main loop: capture frame, undistort, run lane detection and drive control.
+    Main loop: capture frame, optionally undistort,
+    run lane detection and drive control.
+
+    If map1 and map2 are None -> no undistortion, raw frame is used.
     """
+    use_undistort = (map1 is not None) and (map2 is not None)
     print("[INFO] Main loop started. Press 'q' to quit.")
+    print(f"[INFO] Undistortion enabled: {use_undistort}")
 
     while True:
         # 1) Capture RGB frame from Picamera2
-        frame_rgb = picam2.capture_array()
+        frame_bgr = picam2.capture_array()
 
         # 2) Convert to BGR for OpenCV
-        frame_bgr = cv2.cvtColor(frame_rgb, cv2.COLOR_RGB2BGR)
+        if IS_BGR == False:
+            frame_bgr = cv2.cvtColor(frame_bgr, cv2.COLOR_RGB2BGR)
 
-        # 3) Undistort using precomputed maps
-        undistorted = cv2.remap(
-            frame_bgr,
-            map1,
-            map2,
-            interpolation=cv2.INTER_LINEAR,
-            borderMode=cv2.BORDER_CONSTANT,
-        )
+        # 3) Optionally undistort using precomputed maps
+        if use_undistort:
+            frame_proc = cv2.remap(
+                frame_bgr,
+                map1,
+                map2,
+                interpolation=cv2.INTER_LINEAR,
+                borderMode=cv2.BORDER_CONSTANT,
+            )
+        else:
+            frame_proc = frame_bgr
 
-        # 4) Lane detection on undistorted image
-        lane_result = lane_detector.process_frame(undistorted)
+        # 4) Lane detection on processed image
+        lane_result = lane_detector.process_frame(frame_proc)
 
         # 5) Drive control based on lane detection result
         drive_controller.control_step(lane_result)
@@ -150,7 +171,8 @@ def run_main_loop(picam2, map1, map2, lane_detector, drive_controller, show_debu
         # 6) Optional debug windows
         if show_debug:
             cv2.imshow("Original (BGR)", frame_bgr)
-            cv2.imshow("Undistorted", undistorted)
+            if use_undistort:
+                cv2.imshow("Undistorted", frame_proc)
 
         key = cv2.waitKey(1) & 0xFF
         if key == ord("q"):
@@ -163,24 +185,47 @@ def run_main_loop(picam2, map1, map2, lane_detector, drive_controller, show_debu
 # ----------------- Entry point ----------------- #
 
 def main():
-    # 1) Load calibration
-    K, D, DIM = load_fisheye_calibration("camera_fisheye_calib.npz")
+    # local flag, in case calibration fails
+    use_calib = USE_CALIBRATION
+
+    map1 = None
+    map2 = None
+
+    if use_calib:
+        try:
+            # 1) Load calibration
+            K, D, DIM = load_fisheye_calibration(CALIB_FILE)
+            cam_dim = DIM
+        except Exception as e:
+            print("[WARN] Failed to load calibration:", e)
+            print("[WARN] Falling back to raw camera (no undistortion).")
+            use_calib = False
+            cam_dim = DEFAULT_DIM
+    else:
+        cam_dim = DEFAULT_DIM
 
     # 2) Init camera
-    picam2 = init_picamera(DIM)
+    picam2 = init_picamera(cam_dim)
 
-    # 3) Prepare undistortion maps
-    map1, map2 = create_undistort_maps(K, D, DIM, balance=0.0)
+    # 3) Prepare undistortion maps if calibration is enabled
+    if use_calib:
+        map1, map2 = create_undistort_maps(K, D, cam_dim, balance=0.0)
 
     # 4) Init modules (lane detection + drive)
-    width, height = DIM
+    width, height = cam_dim
     lane_detector, drive_controller = init_modules(width, height)
 
     # 5) Run main loop
     try:
-        run_main_loop(picam2, map1, map2, lane_detector, drive_controller, show_debug=True)
+        run_main_loop(
+            picam2=picam2,
+            lane_detector=lane_detector,
+            drive_controller=drive_controller,
+            map1=map1,
+            map2=map2,
+            show_debug=True,
+        )
     finally:
-        # Make sure camera and windows are properly closed
         picam2.stop()
         cv2.destroyAllWindows()
         print("[INFO] Clean shutdown.")

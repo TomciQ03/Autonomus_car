@@ -246,10 +246,6 @@ class LaneDetector:
         mask_white = cv2.morphologyEx(mask_white, cv2.MORPH_CLOSE, np.ones((5, 5), np.uint8))
         mask_white = cv2.GaussianBlur(mask_white, (5, 5), 0)
 
-        # Optional thinning if available
-        if hasattr(cv2, "ximgproc") and hasattr(cv2.ximgproc, "thinning"):
-            mask_white = cv2.ximgproc.thinning(mask_white)
-
         return mask_white
 
     @staticmethod
